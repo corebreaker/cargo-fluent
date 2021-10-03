@@ -1,0 +1,13 @@
+[package]
+name = "cargo-fluent"
+version = "1.0.0"
+edition = "2018"
+description = "Cargo Tool for Fluent internationalization system"
+
+[dependencies]
+toml = "~0.5.8"
+libc = "0.2.103"
+translate-storage = "^0.0.1"
+syn = { version = "~1.0.77", features = ["full"] }
+clap = { version = "^2.33.3", features = ["wrap_help"] }
+iced = { version = "0.3.0", features = ["default", "image", "svg", "tokio"] }
