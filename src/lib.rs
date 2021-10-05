@@ -1,3 +1,4 @@
+mod config;
 mod cmd_scan;
 pub mod arg_validators;
 
