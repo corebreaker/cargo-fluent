@@ -1,5 +1,5 @@
 use poreader::{CatalogueReader, PoParser, Origin, note::Note, comment::Comment, unit::Unit};
-use std::{path::Path, io::{BufReader, Result, Error, ErrorKind}, fs::File, collections::HashMap};
+use std::{path::Path, io::Result, fs::File, collections::HashMap};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct PoComment {
@@ -41,6 +41,7 @@ impl PoNote {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct PoUnit {
     unit: Unit,
 }

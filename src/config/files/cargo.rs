@@ -20,6 +20,6 @@ pub(super) struct CargoFile {
 
 impl CargoFile {
     pub(super) fn get_members(&self, root: &PathBuf, members: &mut HashMap<String, PathBuf>) {
-        self.workspace.map(|w| w.get_members(root, members));
+        self.workspace.as_ref().map(|w| w.get_members(root, members));
     }
 }

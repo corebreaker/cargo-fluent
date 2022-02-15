@@ -1,4 +1,4 @@
-use cargo_fluent::{arg_validators::{file_exists}, commands::{cmd_scan, cmd_convert, cmd_edit}, config::Config};
+use cargo_fluent::{commands::{cmd_scan, cmd_convert, cmd_edit}, config::Config};
 use clap::{clap_app, crate_authors, crate_version, crate_description};
 use std::{ffi::CString, io::Result, process::exit};
 

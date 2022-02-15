@@ -8,7 +8,7 @@ pub(in super::super) struct I18nGettext {
 
 impl I18nGettext {
     pub(super) fn is_empty(&self) -> bool {
-        self.output_dir.map_or(true, |d| d.is_empty()) && self.po_dir.map_or(true, |d| d.is_empty())
+        self.output_dir.as_ref().map_or(true, |d| d.is_empty()) && self.po_dir.as_ref().map_or(true, |d| d.is_empty())
     }
 }
 
@@ -19,7 +19,7 @@ pub(in super::super) struct I18nFluent {
 
 impl I18nFluent {
     pub(super) fn is_empty(&self) -> bool {
-        self.assets_dir.map_or(true, |d| d.is_empty())
+        self.assets_dir.as_ref().map_or(true, |d| d.is_empty())
     }
 }
 
@@ -32,8 +32,8 @@ pub(in super::super) struct I18nFile {
 
 impl I18nFile {
     pub(super) fn is_empty(&self) -> bool {
-        self.fallback_language.map_or(true, |l| l.is_empty())
-            && self.fluent.map_or(true, |c| c.is_empty())
-            && self.gettext.map_or(true, |c| c.is_empty())
+        self.fallback_language.as_ref().map_or(true, |l| l.is_empty())
+            && self.fluent.as_ref().map_or(true, |c| c.is_empty())
+            && self.gettext.as_ref().map_or(true, |c| c.is_empty())
     }
 }

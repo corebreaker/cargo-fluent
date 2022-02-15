@@ -2,9 +2,19 @@ use toml;
 use serde::Deserialize;
 use std::{io::{Result, Error, ErrorKind, Read}, fs::File, path::Path};
 
-pub(super) fn read_toml<'de, C: Deserialize<'de>>(path: &'de Path) -> Result<C> {
-    let mut input = String::new();
+pub(super) struct TomlFile {
+    source: String
+}
 
-    File::open(path).and_then(|mut f| f.read_to_string(&mut input))?;
-    toml::from_str(&input).map_err(|err| Error::new(ErrorKind::Other, err))
+impl TomlFile {
+    pub(super) fn new(path: &Path) -> Result<Self> {
+        let mut source = String::new();
+
+        File::open(path).and_then(|mut f| f.read_to_string(&mut source))?;
+        Ok(Self { source })
+    }
+
+    pub(super) fn decode<'de, 'a: 'de, C: Deserialize<'de>>(&'a self) -> Result<C> {
+        toml::from_str(&self.source).map_err(|err| Error::new(ErrorKind::Other, err))
+    }
 }
