@@ -1,7 +1,4 @@
-mod config;
-mod cmd_scan;
+mod files;
+pub mod config;
+pub mod commands;
 pub mod arg_validators;
-
-pub mod commands {
-    pub use super::cmd_scan::command as cmd_scan;
-}

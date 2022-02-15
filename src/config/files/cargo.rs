@@ -1,6 +1,6 @@
 use super::make_path_from_name;
 use serde::Deserialize;
-use std::{collections::HashMap, path::{Path, PathBuf}};
+use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Deserialize)]
 pub(super) struct CargoWorkspace {

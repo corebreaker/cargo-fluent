@@ -1,4 +1,4 @@
-use cargo_fluent::{arg_validators::{file_exists}, commands::{cmd_scan}};
+use cargo_fluent::{arg_validators::{file_exists}, commands::{cmd_scan, cmd_convert, cmd_edit}, config::Config};
 use clap::{clap_app, crate_authors, crate_version, crate_description};
 use std::{ffi::CString, io::Result, process::exit};
 
@@ -12,10 +12,20 @@ fn work() -> Result<()> {
         (@subcommand scan =>
             (version: crate_version!())
             (author: crate_authors!())
-            (about: "")
+            (about: "scan source files (rust files only) and create or update the FLT files")
             (after_help: "Help")
-            (@arg PATH: * ... {file_exists} "")
-            (@arg dest: -d --dest <path> "")
+        )
+        (@subcommand convert =>
+            (version: crate_version!())
+            (author: crate_authors!())
+            (about: "scan po files and create or update the FLT files")
+            (after_help: "Help")
+        )
+        (@subcommand edit =>
+            (version: crate_version!())
+            (author: crate_authors!())
+            (about: "start a GUI for editing the FLT files")
+            (after_help: "Help")
         )
     ).get_matches();
 
@@ -28,7 +38,11 @@ fn work() -> Result<()> {
         }
     }
 
-    if let Some(cmd) = args.subcommand_matches("scan") { cmd_scan(cmd)? }
+    let config = Config::read()?;
+
+    if let Some(cmd) = args.subcommand_matches("scan") { cmd_scan(cmd, &config)? }
+    if let Some(cmd) = args.subcommand_matches("convert") { cmd_convert(cmd, &config)? }
+    if let Some(cmd) = args.subcommand_matches("edit") { cmd_edit(cmd, &config)? }
 
     Ok(())
 }

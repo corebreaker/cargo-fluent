@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use iced::futures::TryFutureExt;
 
 #[derive(Deserialize)]
 pub(in super::super) struct I18nGettext {

@@ -1,5 +1,5 @@
 use super::files::{i18n::I18nFile, read_i18n};
-use std::{path::{Path, PathBuf}, collections::HashMap, io::Result};
+use std::{path::PathBuf, collections::HashMap, io::Result};
 
 pub struct CrateConfig {
     name: String,

@@ -2,14 +2,14 @@ mod files;
 mod read_toml;
 mod create_config;
 
-use std::{path::PathBuf, collections::HashMap, io::Result, env::current_dir};
+use std::{collections::HashMap, io::Result, env::current_dir};
 
-pub(super) struct Config {
+pub struct Config {
     crates: HashMap<String, create_config::CrateConfig>
 }
 
 impl Config {
-    pub(super) fn read() -> Result<Config> {
+    pub fn read() -> Result<Config> {
         let cwd = current_dir()?;
         let mut crates = HashMap::new();
 
