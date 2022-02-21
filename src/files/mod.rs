@@ -1,5 +1,3 @@
-mod sources;
-mod pofile;
-mod fluent;
-
-pub(crate) use self::{pofile::PoFile};
+pub(crate) mod pofile;
+pub(crate) mod fluent;
+pub(crate) mod source;

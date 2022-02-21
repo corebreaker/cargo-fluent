@@ -1,13 +1,29 @@
 [package]
 name = "cargo-fluent"
 version = "1.0.0"
-edition = "2018"
+edition = "2021"
 description = "Cargo Tool for Fluent internationalization system"
+authors = ["Frédéric Meyer <frederic.meyer.77@gmail.com>"]
+license = "MPL-2.0"
+documentation = "https://docs.rs/cargo-fluent"
+repository = "https://github.com/corebreaker/cargo-fluent"
+readme = "README.md"
+keywords = ["translate", "localization", "l10n", "i18n", "intl", "internationalization"]
+categories = ["localization", "internationalization", "text-processing"]
+
+[badges]
+maintenance = { status = "passively-maintained" }
 
 [dependencies]
 toml = "~0.5.8"
 libc = "~0.2.117"
 poreader = "~1.0.6"
+fluent = "~0.16.0"
+fluent-syntax = "~0.11.0"
+unic-langid = "~0.9.0"
+simple-error = "~0.2.3"
+regex = "~1.5.4"
+itertools = "~0.10.3"
 serde = { version = "~1.0.136", features = ["std", "serde_derive"] }
 syn = { version = "~1.0.86", features = ["full"] }
 clap = { version = "~2.33.4", features = ["wrap_help"] }

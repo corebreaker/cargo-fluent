@@ -14,12 +14,10 @@ impl Config {
         let mut crates = HashMap::new();
 
         for (name, path) in files::get_crates(&cwd)? {
-            create_config::CrateConfig::import_config(name, path, &mut crates)?
+            create_config::CrateConfig::import_config(name, path, &mut crates)?;
         }
 
-        if let Some(conf) = files::read_i18n(&cwd)? {
-            create_config::CrateConfig::import_config(String::from("."), cwd, &mut crates)?
-        }
+        create_config::CrateConfig::import_config(String::from("."), cwd, &mut crates)?;
 
         Ok(Config { crates })
     }
