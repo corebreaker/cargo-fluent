@@ -2,6 +2,7 @@ use super::FluentInformations;
 use itertools::Itertools;
 use std::io::{Write, Result};
 
+#[derive(Debug)]
 pub struct FluentGroup {
     name: Option<String>,
     message_ids: Vec<String>,

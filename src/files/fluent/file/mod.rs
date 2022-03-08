@@ -6,6 +6,7 @@ use super::{FluentGroup, FluentMessage, FluentInformations};
 use unic_langid::LanguageIdentifier;
 use std::{io::{Write, Result}, collections::HashMap, path::Path};
 
+#[derive(Debug)]
 pub struct FluentFile {
     lang: LanguageIdentifier,
     messages: HashMap<String, FluentMessage>,
@@ -16,7 +17,7 @@ pub struct FluentFile {
 }
 
 impl FluentFile {
-    pub(crate) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> {
+    pub(crate) fn read(lang: LanguageIdentifier, path: &Path) -> Result<Self> {
         reader::read(lang, path)
     }
 

@@ -12,7 +12,7 @@ pub(crate) struct PoFile {
 }
 
 impl PoFile {
-    pub(crate) fn new(path: &Path) -> Result<PoFile> {
+    pub(crate) fn read(path: &Path) -> Result<Self> {
         let parser = PoParser::new();
         let reader = parser.parse( File::open(path)?)?;
 

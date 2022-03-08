@@ -1,6 +1,7 @@
 use regex::Regex;
 use std::{io::{Write, Result}, collections::HashMap, hash::Hash, borrow::Borrow};
 
+#[derive(Debug)]
 pub struct FluentInformations {
     headers: HashMap<String, String>,
     comments: Vec<String>,

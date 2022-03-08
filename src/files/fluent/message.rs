@@ -1,6 +1,7 @@
 use super::FluentInformations as Infos;
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct FluentMessage {
     id: String,
     value: Option<String>,
