@@ -12,20 +12,33 @@ fn work() -> Result<()> {
         (@subcommand scan =>
             (version: crate_version!())
             (author: crate_authors!())
-            (about: "scan source files (rust files only) and create or update the FLT files")
-            (after_help: "Help")
+            (about: "Scan source files (rust files only) and create or update the FLT files")
+            (after_help: "\
+                This command will read config files (Cargo.toml and i18n.toml) from the current directory. \
+                Then, it will scan all source files and all translation messages will be extracted from the sources. \
+                Finally, the Fluent translation file for the default language will be created. \
+                If some Fluent files exist, they could be updated.\
+            ")
         )
         (@subcommand convert =>
             (version: crate_version!())
             (author: crate_authors!())
-            (about: "scan po files and create or update the FLT files")
-            (after_help: "Help")
+            (about: "Scan PO files and create or update the FLT files")
+            (after_help: "\
+                This command will read PO files and from the config files read from the current directory, \
+                the Fluent translation file for the default language will be created. \
+                If some Fluent files exist, they could be updated.\
+            ")
         )
         (@subcommand edit =>
             (version: crate_version!())
             (author: crate_authors!())
-            (about: "start a GUI for editing the FLT files")
-            (after_help: "Help")
+            (about: "Start a GUI for editing the FLT files")
+            (after_help: "\
+                An editor will opened and the existing Fluent files found \
+                from the current directory could be modified. \
+                The editor cannot create Fluent files, they must be created manually or with another command.\
+            ")
         )
     ).get_matches();
 
