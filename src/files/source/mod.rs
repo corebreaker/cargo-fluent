@@ -10,10 +10,11 @@ pub(crate) use self::{
     message::Message,
 };
 
+use self::error::ParseErrorFormatter;
 use pathdiff::diff_paths;
+use path_absolutize::Absolutize;
 use proc_macro2::{Span, Literal};
-use std::{io::{Result, Read, Error, ErrorKind}, fs::{File, canonicalize}, path::Path, env::current_dir};
-use crate::files::source::error::ParseErrorFormatter;
+use std::{io::{Result, Read, Error, ErrorKind}, fs::File, path::Path, env::current_dir};
 
 #[derive(Debug)]
 pub(crate) struct RustSource {
@@ -28,7 +29,7 @@ impl RustSource {
 
         file.read_to_string(&mut content)?;
 
-        let path = if path.is_absolute() { path.to_path_buf() } else { canonicalize(path)? };
+        let path = if path.is_absolute() { path.to_path_buf() } else { path.absolutize().map(|p| p.to_path_buf())? };
         let rel_path = diff_paths(&path, current_dir()?).unwrap_or(path);
         let name = rel_path.to_string_lossy().to_string();
 

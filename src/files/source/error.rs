@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use simple_error::SimpleError;
 use std::{io::{Error, ErrorKind}, fmt::Write};
 
@@ -71,7 +70,7 @@ impl ParseErrorFormatter {
 
     pub(super) fn into_error(self, name: &String) -> Error {
         let err = format_errors(self.0, "", false);
-        let mut msg = if name.is_empty() {
+        let msg = if name.is_empty() {
             format!("Parse error: {}", err)
         } else {
             format!("Parse error in {}:{}", name, err)

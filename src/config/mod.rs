@@ -1,24 +1,44 @@
 mod files;
+mod infos;
 mod read_toml;
-mod create_config;
+mod path_helper;
 
-use std::{collections::HashMap, io::Result, env::current_dir};
+use std::{io::Result, path::{Path, PathBuf}, env::current_dir};
 
+#[derive(Debug)]
 pub struct Config {
-    crates: HashMap<String, create_config::CrateConfig>
+    name: String,
+    root: PathBuf,
+    output: PathBuf,
+    fallback_language: String,
 }
 
 impl Config {
-    pub fn read() -> Result<Config> {
-        let cwd = current_dir()?;
-        let mut crates = HashMap::new();
+    pub fn read(output: Option<String>) -> Result<Config> {
+        let root = current_dir()?;
+        let name = files::get_crate_name(&root)?;
 
-        for (name, path) in files::get_crates(&cwd)? {
-            create_config::CrateConfig::import_config(name, path, &mut crates)?;
-        }
+        let output = output.map_or(Ok(None), |d| path_helper::to_dirpath(d).map(Some))?;
+        let (output, fallback_language) = match infos::CrateInfos::import_config(&root)? {
+            Some(infos) => (output.or(infos.fluent_assets), infos.fallback_language),
+            None => (output, String::from("en-US")),
+        };
 
-        create_config::CrateConfig::import_config(String::from("."), cwd, &mut crates)?;
+        let output = output.unwrap_or_else(|| root.join("i18n"));
 
-        Ok(Config { crates })
+        Ok(Config { name, root, output, fallback_language })
+    }
+
+    pub(crate) fn name(&self) -> &str {
+        &self.name
+    }
+    pub(crate) fn root(&self) -> &Path {
+        &self.root
+    }
+    pub(crate) fn output(&self) -> &Path {
+        &self.output
+    }
+    pub(crate) fn fallback_language(&self) -> &str {
+        &self.fallback_language
     }
 }
