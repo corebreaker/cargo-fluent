@@ -1,25 +1,17 @@
-use super::make_path_from_name;
 use serde::Deserialize;
-use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Deserialize)]
-pub(super) struct CargoWorkspace {
-    members: Vec<String>
-}
-
-impl CargoWorkspace {
-    pub(super) fn get_members(&self, root: &PathBuf, members: &mut HashMap<String, PathBuf>) {
-        members.extend(self.members.iter().filter_map(|name| make_path_from_name(root, name)))
-    }
+pub(super) struct CargoPackage {
+    name: String
 }
 
 #[derive(Deserialize)]
 pub(super) struct CargoFile {
-    workspace: Option<CargoWorkspace>
+    package: Option<CargoPackage>,
 }
 
 impl CargoFile {
-    pub(super) fn get_members(&self, root: &PathBuf, members: &mut HashMap<String, PathBuf>) {
-        self.workspace.as_ref().map(|w| w.get_members(root, members));
+    pub(super) fn name(&self) -> Option<String> {
+        self.package.as_ref().map(|package| package.name.replace("-", "_"))
     }
 }
