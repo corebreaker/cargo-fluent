@@ -1,6 +1,6 @@
 use super::path_pattern::parse_path_pattern;
 use clap::{Parser, Args, Subcommand};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
 #[clap(version, author, about, subcommand_required = true, arg_required_else_help = true, propagate_version = true)]
@@ -47,11 +47,18 @@ pub enum CliCommand {
         The domain will be used to build the name of Fluent files. \
         The domain is got from the name of the current crate, but it can be overridden with the command argument\n\
         If some paths are specified in command line, \
-        there will be the PO files read instead those found by default from values taken in config files. \
+        there will be the PO files read instead those found by default from values taken in config files.\n\
         The list of paths can be either files or directories.\n\
         If paths contain wildcards or specify directories, only PO files will be selected, \
         files with an extension `.po`.\n\
-        Path must be relatives to the current directory.\
+        Path must be relatives to the current directory.\n\
+        \n\
+        The domain will be the name of the Fluent file (FLT file).\n\
+        Therefore, the name of each PO file found will be the domain.\n\
+        \n\
+        The flag `merge` will merge all translations found in PO files into one Fluent file.\n\
+        If it was not specified, \
+        the list of paths overrides the argument `domain` and the domain found in config files.\
     ")]
     Convert(ConvertArgs),
 
@@ -81,17 +88,21 @@ pub struct ConvertArgs {
     #[clap(short, long)]
     pub(crate) domain: Option<String>,
 
+    /// Merge all PO files into one FLT file per language and for all found domains
+    #[clap(short, long)]
+    pub(crate) merge: bool,
+
     /// PO files or directories used instead files found with config files
     #[clap(value_name = "PATH", parse(try_from_str = parse_path_pattern))]
     po_files: Vec<Vec<PathBuf>>,
 }
 
 impl ConvertArgs {
-    pub(crate) fn po_files(&self) -> Option<Vec<&PathBuf>> {
+    pub(crate) fn po_files(&self) -> Option<Vec<&Path>> {
         if self.po_files.is_empty() {
             None
         } else {
-            Some(self.po_files.iter().flatten().collect())
+            Some(self.po_files.iter().flatten().map(|p| p.as_path()).collect())
         }
     }
 }

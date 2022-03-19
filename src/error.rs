@@ -2,6 +2,11 @@ use simple_error::SimpleError;
 use std::io::{Error, ErrorKind};
 
 #[inline]
+pub(crate) fn mk_error(kind: ErrorKind, msg: impl Into<String>) -> Error {
+    Error::new(kind, SimpleError::new(msg))
+}
+
+#[inline]
 pub(crate) fn mk_error_with_msg(msg: impl Into<String>) -> Error {
     Error::new(ErrorKind::Other, SimpleError::new(msg))
 }
