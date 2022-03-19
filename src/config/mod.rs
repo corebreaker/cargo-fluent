@@ -18,7 +18,7 @@ impl Config {
         let root = current_dir()?;
         let name = files::get_crate_name(&root)?;
 
-        let output = output.map_or(Ok(None), |d| path_helper::to_dirpath(d).map(Some))?;
+        let output = output.map_or(Ok(None), |p| path_helper::make_dirpath(p).map(Some))?;
         let (output, fallback_language) = match infos::CrateInfos::import_config(&root)? {
             Some(infos) => (output.or(infos.fluent_assets), infos.fallback_language),
             None => (output, String::from("en-US")),

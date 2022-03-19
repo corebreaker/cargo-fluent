@@ -1,5 +1,5 @@
-use simple_error::SimpleError;
-use std::{io::{Error, ErrorKind}, fmt::Write};
+use crate::error::mk_error_with_msg;
+use std::{io::Error, fmt::Write};
 
 fn format_error_line(err: syn::Error) -> String {
     let loc = err.span().start();
@@ -76,6 +76,6 @@ impl ParseErrorFormatter {
             format!("Parse error in {}:{}", name, err)
         };
 
-        Error::new(ErrorKind::Other, SimpleError::new(msg))
+        mk_error_with_msg(msg)
     }
 }
