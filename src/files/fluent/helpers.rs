@@ -1,8 +1,8 @@
 use super::{FluentMessage, FluentInformations, pattern_stringifier::pattern_as_str};
+use crate::error::mk_error_with_msg;
 use regex::Regex;
-use simple_error::SimpleError;
 use fluent_syntax::ast::{Attribute, Comment, Identifier, Message, Pattern, Term};
-use std::{io::{Error, ErrorKind}, path::Path};
+use std::{path::Path, io::Error};
 
 #[inline]
 pub(super) fn make_error<E: std::error::Error>(prefix: &str, path: &Path, errs: Vec<E>) -> Error {
@@ -12,7 +12,7 @@ pub(super) fn make_error<E: std::error::Error>(prefix: &str, path: &Path, errs: 
         msg.push_str(&format!("  - {}", err));
     }
 
-    Error::new(ErrorKind::Other, SimpleError::new(msg))
+    mk_error_with_msg(msg)
 }
 
 pub(super) trait IMessage {

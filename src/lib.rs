@@ -1,3 +1,4 @@
+mod error;
 mod files;
 pub mod cli;
 pub mod config;

@@ -1,22 +1,23 @@
+use crate::error::mk_error_with_msg;
 use path_absolutize::Absolutize;
 use simple_error::SimpleError;
-use std::{path::{PathBuf, Path}, io::{Result, Error, ErrorKind}};
+use std::{path::{PathBuf, Path}, io::Result, borrow::Cow};
 
-pub(super) fn path_join(base: &Path, path: &Path) -> Result<PathBuf> {
-    base.join(path).absolutize().map(|p| p.to_path_buf())
+#[inline]
+fn make_path_from_cow_path(p: Cow<Path>) -> PathBuf {
+    p.to_path_buf()
 }
 
+pub(super) fn path_join(base: &Path, path: &Path) -> Result<PathBuf> {
+    base.join(path).absolutize().map(make_path_from_cow_path)
+}
 
-pub(super) fn to_dirpath(pathname: String) -> Result<PathBuf> {
-    let res = PathBuf::from(pathname);
+pub(super) fn make_dirpath(p: String) -> Result<PathBuf> {
+    let res = PathBuf::from(p);
 
-    if !res.exists() {
-        return Err(Error::new(ErrorKind::Other, SimpleError::new(format!("The path {:?} does not exist", res))));
+    if res.exists() && !res.is_dir() {
+        Err(mk_error_with_msg(format!("If the path {:?} exists, it must be a directory", res)))
+    } else {
+        res.absolutize().map(make_path_from_cow_path)
     }
-
-    if !res.is_dir() {
-        return Err(Error::new(ErrorKind::Other, SimpleError::new(format!("The path {:?} is not a directory", res))));
-    }
-
-    Ok(res)
 }
