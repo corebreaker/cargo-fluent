@@ -1,6 +1,5 @@
 use crate::error::mk_error_with_msg;
 use path_absolutize::Absolutize;
-use simple_error::SimpleError;
 use std::{path::{PathBuf, Path}, io::Result, borrow::Cow};
 
 #[inline]
