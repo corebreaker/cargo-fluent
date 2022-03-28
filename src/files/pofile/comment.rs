@@ -10,11 +10,7 @@ impl PoComment {
         PoComment { comment }
     }
 
-    pub(crate) fn kind(&self) -> char {
-        self.comment.kind()
-    }
-
-    pub(crate) fn comment(&self) -> &String {
+    pub(crate) fn comment(&self) -> &str {
         self.comment.comment()
     }
 }

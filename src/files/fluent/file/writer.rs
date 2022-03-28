@@ -90,13 +90,7 @@ impl<'f, W: Write> FileWriter<'f, W> {
     }
 
     fn write(&mut self) -> Result<()> {
-        let mut iter = self.file.entries.iter();
-
-        if let Some(entry) = iter.next() {
-            self.write_entry(entry)?;
-        }
-
-        for entry in iter {
+        for entry in &self.file.entries {
             self.write_entry(entry)?;
         }
 

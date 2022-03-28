@@ -16,21 +16,22 @@ maintenance = { status = "passively-maintained" }
 
 [dependencies]
 toml = "~0.5.8"
-libc = "~0.2.119"
-poreader = "~1.0.6"
+libc = "~0.2.121"
+poreader = "~1.1.1"
 fluent = "~0.16.0"
 fluent-syntax = "~0.11.0"
-unic-langid = "~0.9.0"
+heck = "~0.4.0"
+titlecase = "~1.1.0"
 simple-error = "~0.2.3"
 regex = "~1.5.5"
 itertools = "~0.10.3"
-quote = "~1.0.15"
+quote = "~1.0.17"
 pathdiff = "~0.2.1"
-path-absolutize = "~3.0.11"
+path-absolutize = "~3.0.12"
 i18n-config = "~0.4.2"
 wax = { version = "~0.4.0", features = ["diagnostics-report"] }
 proc-macro2 = { version = "~1.0.36", features = ["span-locations"] }
 serde = { version = "~1.0.136", features = ["std", "serde_derive"] }
-syn = { version = "~1.0.86", features = ["full", "visit", "parsing", "extra-traits"] }
+syn = { version = "~1.0.89", features = ["full", "visit", "parsing", "extra-traits"] }
 clap = { version = "~3.1.6", features = ["wrap_help", "derive"] }
 iced = { version = "~0.3.0", features = ["default", "image", "svg", "tokio"] }

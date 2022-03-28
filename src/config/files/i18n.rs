@@ -4,14 +4,12 @@ use std::{io::{Result, Error, ErrorKind}, path::{Path, PathBuf}};
 
 #[derive(Debug)]
 pub(in super::super) struct I18nGettext {
-    pub(in super::super) output_dir: PathBuf,
     pub(in super::super) po_dir: PathBuf,
 }
 
 impl I18nGettext {
     fn from_conf(dir: &Path, conf: &GettextConfig) -> Result<Self> {
         Ok(I18nGettext {
-            output_dir: path_join(dir, &conf.output_dir)?,
             po_dir: path_join(dir, &conf.po_dir())?,
         })
     }

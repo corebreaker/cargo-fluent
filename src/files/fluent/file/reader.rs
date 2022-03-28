@@ -2,10 +2,9 @@ use super::{super::{helpers::{make_error, IMessage}, FluentInformations, FluentG
 use regex::Regex;
 use fluent::FluentResource;
 use fluent_syntax::ast::Entry;
-use unic_langid::LanguageIdentifier;
 use std::{io::{Result, Error, ErrorKind}, collections::HashMap, path::Path, fs::read_to_string};
 
-pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> {
+pub(super) fn read(lang: String, path: &Path) -> Result<FluentFile> {
     let infos_re = match Regex::new(r"^\s*@(\w+)[^:]*:\s*(\S.*)\s*$") {
         Ok(re) => re,
         Err(err) => { return Err(Error::new(ErrorKind::Other, err)); }
@@ -58,7 +57,7 @@ pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> 
                 }
 
                 let lines = c.content.iter().map(|c| c.to_string()).collect::<Vec<_>>();
-                let mut infos = FluentInformations::new(&infos_re, lines);
+                let mut infos = FluentInformations::from_lines(&infos_re, lines);
 
                 entries.push(EntryType::Group);
                 current_group_name = infos.remove_header("name");
@@ -86,7 +85,7 @@ pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> 
         lang,
         messages,
         groups,
-        infos: FluentInformations::new(&infos_re, info_lines),
+        infos: FluentInformations::from_lines(&infos_re, info_lines),
         junk,
         entries,
     })

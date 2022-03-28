@@ -1,5 +1,5 @@
 use crate::error::mk_error_with_msg_from_error;
-use wax::{Glob, GlobError};
+use wax::Glob;
 use std::{path::PathBuf, io::Result};
 
 #[cfg(windows)]

@@ -4,7 +4,6 @@ use std::{path::Path, io::Result, fs::File, collections::HashMap};
 
 #[derive(Debug)]
 pub(crate) struct PoFile {
-    target_language: String,
     headers: HashMap<String, String>,
     comments: Vec<PoComment>,
     notes: Vec<PoNote>,
@@ -16,7 +15,6 @@ impl PoFile {
         let parser = PoParser::new();
         let reader = parser.parse( File::open(path)?)?;
 
-        let target_language = reader.target_language().to_string();
         let headers = reader.header_properties().clone();
         let comments = reader.header_comments().iter().map(|c| PoComment::new(c.clone())).collect();
         let notes = reader.header_notes().iter().map(|n| PoNote::new(n.clone())).collect();
@@ -27,11 +25,7 @@ impl PoFile {
             units.push(PoUnit::new(u?));
         }
 
-        Ok(PoFile { target_language, headers, comments, notes, units })
-    }
-
-    pub(crate) fn target_language(&self) -> &str {
-        &self.target_language
+        Ok(PoFile { headers, comments, notes, units })
     }
 
     pub(crate) fn headers(&self) -> &HashMap<String, String> {

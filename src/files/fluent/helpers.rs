@@ -2,7 +2,14 @@ use super::{FluentMessage, FluentInformations, pattern_stringifier::pattern_as_s
 use crate::error::mk_error_with_msg;
 use regex::Regex;
 use fluent_syntax::ast::{Attribute, Comment, Identifier, Message, Pattern, Term};
-use std::{path::Path, io::Error};
+use std::{path::Path, io::Error, collections::{HashMap, hash_map::Entry}};
+
+pub(super) fn add_header(headers: &mut HashMap<String, String>, key: &str, value: &str) {
+    match headers.entry(key.to_lowercase()) {
+        Entry::Vacant(entry) => { entry.insert(value.to_string()); }
+        Entry::Occupied(mut entry) => { entry.get_mut().push_str(value); }
+    }
+}
 
 #[inline]
 pub(super) fn make_error<E: std::error::Error>(prefix: &str, path: &Path, errs: Vec<E>) -> Error {
@@ -33,7 +40,7 @@ pub(super) trait IMessage {
             .unwrap_or_default();
 
         let value = self.get_value().map(pattern_as_str);
-        let infos = FluentInformations::new(infos_re, lines);
+        let infos = FluentInformations::from_lines(infos_re, lines);
 
         FluentMessage::new(id.clone(), value, attributes, infos)
     }
