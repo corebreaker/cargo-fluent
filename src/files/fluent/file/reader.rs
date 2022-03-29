@@ -1,11 +1,16 @@
-use super::{super::{helpers::{make_error, IMessage}, FluentInformations, FluentGroup}, entry::EntryType, FluentFile};
+use super::{
+    super::{helpers::make_error_from_error_list, decoder::IDecoder, FluentInformations, FluentGroup},
+    entry::EntryType,
+    FluentFile,
+};
+
 use regex::Regex;
 use fluent::FluentResource;
 use fluent_syntax::ast::Entry;
 use std::{io::{Result, Error, ErrorKind}, collections::HashMap, path::Path, fs::read_to_string};
 
 pub(super) fn read(lang: String, path: &Path) -> Result<FluentFile> {
-    let infos_re = match Regex::new(r"^\s*@(\w+)[^:]*:\s*(\S.*)\s*$") {
+    let infos_re = match Regex::new(r"^\s*@([\w-]+)[^:]*:\s*(\S.*)\s*$") {
         Ok(re) => re,
         Err(err) => { return Err(Error::new(ErrorKind::Other, err)); }
     };
@@ -13,7 +18,7 @@ pub(super) fn read(lang: String, path: &Path) -> Result<FluentFile> {
     let resource = match FluentResource::try_new(read_to_string(path)?) {
         Ok(r) => r,
         Err((_, errs)) => {
-            return Err(make_error("Parse error while reading fluent file", path, errs));
+            return Err(make_error_from_error_list("Parse error while reading fluent file", path, errs));
         }
     };
 

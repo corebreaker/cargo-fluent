@@ -2,7 +2,7 @@ mod entry;
 mod reader;
 mod writer;
 
-use super::{FluentGroup, FluentMessage, FluentInformations};
+use super::{FluentGroup, FluentMessage, FluentInformations, helpers::message_hash};
 use std::{io::{Write, Result}, collections::HashMap, path::Path, borrow::Borrow, hash::Hash};
 
 #[derive(Debug)]
@@ -73,8 +73,37 @@ impl FluentFile {
         self.messages.entry(id.as_ref().to_string()).or_insert_with(|| FluentMessage::empty(id.as_ref().to_string()))
     }
 
-    pub(crate) fn fetch_message_from_text(&mut self, text: impl AsRef<str>) -> &mut FluentMessage {
-        self.messages.entry(text.as_ref().to_string()).or_insert_with(|| FluentMessage::empty(text.as_ref().to_string()))
+    pub(crate) fn fetch_message_from_text(&mut self, ctxt: Option<&str>, text: impl AsRef<str>) -> &mut FluentMessage {
+        let hash = message_hash(text.as_ref());
+        let id = match self.find_message_id(ctxt, &hash) {
+            Some(v) => v,
+            None => match ctxt {
+                Some(ctxt) => format!("{}-msg-{}", ctxt, self.messages.len() + 1),
+                None => format!("msg-{}", self.messages.len() + 1),
+            }
+        };
+
+        self.messages.entry(id.clone()).or_insert_with(|| {
+            let mut res = FluentMessage::empty(id);
+            let infos = res.informations_mut();
+
+            infos.set_header("message-id", hash);
+            if let Some(ctxt) = ctxt {
+                infos.set_header("context", ctxt.to_string());
+            }
+
+            res
+        })
+    }
+
+    fn find_message_id(&self, ctxt: Option<&str>, hash: &str) -> Option<String> {
+        for (_, msg) in &self.messages {
+            if msg.equals(ctxt, &hash) {
+                return Some(msg.id().clone());
+            }
+        }
+
+        None
     }
 
     fn write_header<W: Write>(&self, w: &mut W) -> Result<()> {

@@ -55,7 +55,7 @@ impl InputPoFile {
                 continue;
             }
 
-            let msg = into.fetch_message_from_text(unit.message());
+            let msg = into.fetch_message_from_text(unit.context(), unit.message());
 
             add_comments_and_notes(unit.comments(), unit.notes(), msg.informations_mut());
 

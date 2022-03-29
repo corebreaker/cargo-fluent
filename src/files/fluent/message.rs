@@ -32,6 +32,29 @@ impl FluentMessage {
         Self { id, value, attributes, locations, infos }
     }
 
+    pub(super) fn equals(&self, ctxt: Option<&str>, hash: &str) -> bool {
+        let headers = self.infos.headers();
+
+        if let Some(msgid) = headers.get("message-id") {
+            if msgid != hash {
+                return false;
+            }
+        }
+
+        if let Some(ctxt) = ctxt {
+            if let Some(msg_ctx) = headers.get("context") {
+                ctxt == msg_ctx
+            } else {
+                let mut prefix = ctxt.to_string();
+
+                prefix.push_str("-");
+                self.id.starts_with(&prefix)
+            }
+        } else {
+            true
+        }
+    }
+
     pub fn id(&self) -> &String {
         &self.id
     }

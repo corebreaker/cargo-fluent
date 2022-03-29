@@ -1,6 +1,6 @@
 use super::helpers::add_header;
 use regex::Regex;
-use heck::ToTitleCase;
+use titlecase::titlecase;
 use itertools::Itertools;
 use std::{io::{Write, Result}, collections::{HashMap, HashSet}, hash::Hash, borrow::Borrow};
 
@@ -90,7 +90,7 @@ impl FluentInformations {
         }
 
         for name in self.headers.keys().sorted() {
-            let prefix = format!("{} @{}:", prefix.to_title_case(), name);
+            let prefix = format!("{} @{}:", titlecase(prefix), name);
             let prefix_size = prefix.chars().count();
             let mut line = prefix.clone();
             let mut size = prefix_size;

@@ -1,5 +1,14 @@
-use fluent_syntax::ast::{Expression, InlineExpression, Pattern, PatternElement, Variant, VariantKey};
 use itertools::Itertools;
+use fluent_syntax::ast::{
+    InlineExpression,
+    PatternElement,
+    CallArguments,
+    Expression,
+    Identifier,
+    VariantKey,
+    Pattern,
+    Variant,
+};
 
 fn variant_as_str(variant: &Variant<&str>) -> String {
     let value = pattern_as_str(&variant.value);
@@ -11,7 +20,21 @@ fn variant_as_str(variant: &Variant<&str>) -> String {
     if variant.default {
         format!("  *[{}] {}\n", key, value)
     } else {
-        format!("  [{}] {}\n", key, value)
+        format!("   [{}] {}\n", key, value)
+    }
+}
+
+fn message_as_str(id: &Identifier<&str>, attr: &Identifier<&str>, args: Option<&CallArguments<&str>>) -> String {
+    match args {
+        None => format!("{}.{}", id.name, attr.name),
+        Some(args) => {
+            let args = args.positional.iter()
+                .map(inline_expr_as_str)
+                .chain(args.named.iter().map(|arg| format!("{}: {}", arg.name.name, inline_expr_as_str(&arg.value))))
+                .join(", ");
+
+            format!("{}.{}({})", id.name, attr.name, args)
+        }
     }
 }
 
@@ -28,9 +51,11 @@ fn inline_expr_as_str(expr: &InlineExpression<&str>) -> String {
             format!("{}({})", id.name, args)
         }
         InlineExpression::MessageReference { id, attribute } => {
-            attribute.as_ref().map_or_else(|| id.name.to_string(), |a| format!("{}.{}", id.name, a.name))
+            attribute.as_ref().map_or_else(|| id.name.to_string(), |attr| message_as_str(id, attr, None))
         }
-        InlineExpression::TermReference { id, attribute, arguments } => String::new(),
+        InlineExpression::TermReference { id, attribute, arguments } => {
+            attribute.as_ref().map_or_else(|| id.name.to_string(), |attr| message_as_str(id, attr, arguments.as_ref()))
+        }
         InlineExpression::VariableReference { id } => id.name.to_string(),
         InlineExpression::Placeable { expression } => expression_as_str(expression),
     }
