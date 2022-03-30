@@ -1,6 +1,11 @@
 use super::po_file::InputPoFile;
-use crate::{config::Config, cli::ConvertArgs as Args, error::{mk_error, mk_error_with_msg_from_error}};
-use wax::Glob;
+use crate::{
+    error::{mk_error, mk_error_with_msg_from_error, mk_error_with_msg_from_glob_error},
+    cli::ConvertArgs as Args,
+    config::Config,
+};
+
+use wax::{Glob, Pattern};
 use std::{io::{Result, ErrorKind}, env::current_dir};
 
 #[inline]
@@ -37,12 +42,28 @@ fn find_po_files(args: &Args, config: &Config) -> Result<Vec<InputPoFile>> {
         String::from("**/*.po")
     };
 
-    let glob = Glob::new(&expression).map_err(mk_error_with_msg_from_error)?;
+    let target_path = cwd.join("target");
+    let glob = Glob::new(&expression).map_err(mk_error_with_msg_from_glob_error)?;
 
     for entry in glob.walk(po_dir, usize::MAX) {
         let entry = entry.map_err(mk_error_with_msg_from_error)?;
+        let path = entry.path();
 
-        res.push(InputPoFile::read(entry.path())?);
+        if path.starts_with(&target_path) {
+            continue;
+        }
+
+        print!(" - {}", path.to_string_lossy());
+        let file = match InputPoFile::read(entry.path()) {
+            Ok(v) => v,
+            Err(err) => {
+                println!(": {}", err);
+                continue;
+            }
+        };
+
+        println!();
+        res.push(file);
     }
 
     Ok(res)

@@ -1,8 +1,9 @@
 use super::info_helpers::add_comments_and_notes;
 use crate::{files::{pofile::PoFile, fluent::FluentFile}, error::mk_error};
-use std::{path::Path, io::{Result, ErrorKind}, fmt::Write};
+use std::{path::{Path, PathBuf}, io::{Result, ErrorKind}, fmt::Write};
 
 pub(super) struct InputPoFile {
+    pub(super) path: PathBuf,
     pub(super) language: String,
     pub(super) domain: String,
     content: PoFile,
@@ -38,6 +39,7 @@ impl InputPoFile {
         };
 
         Ok(InputPoFile {
+            path: path.to_path_buf(),
             language,
             domain,
             content: PoFile::read(path)?,

@@ -1,5 +1,5 @@
 use crate::files::fluent::FluentFile;
-use std::{path::{Path, PathBuf}, fs::File, io::Result};
+use std::{path::{Path, PathBuf}, fs::{File, create_dir_all}, io::Result};
 
 pub(super) struct FluentFileEntry {
     language: String,
@@ -26,7 +26,14 @@ impl FluentFileEntry {
     }
 
     pub(super) fn write(&self, dir: &Path) -> Result<()> {
-        self.file.write(File::create(self.mk_filepath(dir))?)
+        let out = self.mk_filepath(dir);
+
+        print!(" - {}", out.to_string_lossy());
+        if let Some(dir) = out.parent() {
+            create_dir_all(dir)?;
+        }
+
+        self.file.write(File::create(out)?)
     }
 
     fn mk_filepath(&self, dir: &Path) -> PathBuf {
