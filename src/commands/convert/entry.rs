@@ -37,6 +37,6 @@ impl FluentFileEntry {
     }
 
     fn mk_filepath(&self, dir: &Path) -> PathBuf {
-        dir.join(self.domain.clone()).join(format!("{}.flt", self.language))
+        dir.join(&self.language).join(format!("{}.flt", self.domain))
     }
 }

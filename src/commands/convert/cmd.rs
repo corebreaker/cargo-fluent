@@ -29,6 +29,7 @@ pub fn command(args: Args, config: Config) -> Result<()> {
 
         let language = file.language.clone();
         let domain = domain.clone().unwrap_or_else(|| file.domain.clone());
+
         let into = match reg.fetch(output_dir, language, domain) {
             Ok(v) => v,
             Err(err) => {

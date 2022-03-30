@@ -82,11 +82,11 @@ impl FluentInformations {
 
     pub(super) fn write<W: Write>(&self, w: &mut W, header: Option<&String>, prefix: &str) -> Result<()> {
         for comment in &self.comments {
-            write!(w, "\n{} {}", prefix, comment)?;
+            writeln!(w, "{} {}", prefix, comment)?;
         }
 
         if let Some(header) = header {
-            write!(w, "\n{} @{}", prefix, header)?;
+            writeln!(w, "{} @{}", prefix, header)?;
         }
 
         for name in self.headers.keys().sorted() {
@@ -99,7 +99,7 @@ impl FluentInformations {
                 let v_sz = v.chars().count() + 1;
 
                 if (size + v_sz) >= 100 {
-                    write!(w, "\n{}", line)?;
+                    writeln!(w, "{}", line)?;
 
                     line = format!("{} {}", prefix, v);
                     size = prefix_size + v_sz;
@@ -109,7 +109,7 @@ impl FluentInformations {
                     line.push_str(v);
                 }
 
-                write!(w, "\n{}", line)?;
+                writeln!(w, "{}", line)?;
             }
         }
 

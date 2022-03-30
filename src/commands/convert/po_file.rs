@@ -20,7 +20,7 @@ impl InputPoFile {
             }
         };
 
-        let domain = match parent.file_name() {
+        let language = match parent.file_name() {
             Some(v) => v.to_string_lossy().to_string(),
             None => {
                 let msg = format!("The domain cannot be extracted from the path {:?} (no name for the parent)", path);
@@ -29,7 +29,7 @@ impl InputPoFile {
             }
         };
 
-        let language = match path.file_stem() {
+        let domain = match path.file_stem() {
             Some(v) => v.to_string_lossy().to_string(),
             None => {
                 let msg = format!("The language cannot be extracted from the path {:?}", path);

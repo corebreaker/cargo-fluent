@@ -82,7 +82,7 @@ impl<'f, W: Write> FileWriter<'f, W> {
                     write!(self.w, "\n# {}", line)?;
                 }
 
-                writeln!(self.w, "")?;
+                writeln!(self.w)?;
             }
         }
 
