@@ -2,28 +2,25 @@ use super::helpers::add_header;
 use regex::Regex;
 use titlecase::titlecase;
 use itertools::Itertools;
-use std::{io::{Write, Result}, collections::{HashMap, HashSet}, hash::Hash, borrow::Borrow};
+use std::{io::{Write, Result}, collections::{HashMap}, hash::Hash, borrow::Borrow};
 
 #[derive(Debug)]
 pub struct FluentInformations {
     headers: HashMap<String, String>,
     comments: Vec<String>,
-    comment_set: HashSet<String>,
 }
 
 impl FluentInformations {
-    pub(super) fn new() -> Self {
+    pub(crate) fn new() -> Self {
         FluentInformations {
             headers: HashMap::new(),
             comments: vec![],
-            comment_set: HashSet::new(),
         }
     }
 
     pub(super) fn from_lines(re: &Regex, lines: Vec<String>) -> Self {
         let mut headers = HashMap::new();
         let mut comments = vec![];
-        let mut comment_set = HashSet::new();
 
         for comment in lines {
             if let Some(caps) = re.captures(&comment) {
@@ -35,13 +32,10 @@ impl FluentInformations {
                 }
             }
 
-            if !comment_set.contains(&comment) {
-                comment_set.insert(comment.clone());
-                comments.push(comment);
-            }
+            comments.push(comment);
         }
 
-        Self { headers, comments, comment_set }
+        Self { headers, comments }
     }
 
     pub fn headers(&self) -> &HashMap<String, String> {
@@ -50,6 +44,14 @@ impl FluentInformations {
 
     pub fn comments(&self) -> &Vec<String> {
         &self.comments
+    }
+
+    pub(crate) fn contains_comments(&self, infos: &Self) -> bool {
+        self.comments.join("|").contains(&infos.comments.join("|"))
+    }
+
+    pub(crate) fn add_comments(&mut self, infos: Self) {
+        self.comments.extend(infos.comments)
     }
 
     pub(crate) fn clear(&mut self) {
@@ -74,10 +76,7 @@ impl FluentInformations {
     }
 
     pub(crate) fn add_comment(&mut self, comment: String) {
-        if !self.comment_set.contains(&comment) {
-            self.comment_set.insert(comment.clone());
-            self.comments.push(comment);
-        }
+        self.comments.push(comment);
     }
 
     pub(super) fn write<W: Write>(&self, w: &mut W, header: Option<&String>, prefix: &str) -> Result<()> {
@@ -90,12 +89,18 @@ impl FluentInformations {
         }
 
         for name in self.headers.keys().sorted() {
+            let value = &self.headers[name];
+
+            if name == "X-Generator" && value.starts_with("Poedit") || name == "Plural-Forms" {
+                continue;
+            }
+
             let prefix = format!("{} @{}:", titlecase(prefix), name);
             let prefix_size = prefix.chars().count();
             let mut line = prefix.clone();
             let mut size = prefix_size;
 
-            for v in self.headers[name].split(" ") {
+            for v in value.split(" ") {
                 let v_sz = v.chars().count() + 1;
 
                 if (size + v_sz) >= 100 {
@@ -108,9 +113,9 @@ impl FluentInformations {
                     line.push_str(" ");
                     line.push_str(v);
                 }
-
-                writeln!(w, "{}", line)?;
             }
+
+            writeln!(w, "{}", line)?;
         }
 
         Ok(())

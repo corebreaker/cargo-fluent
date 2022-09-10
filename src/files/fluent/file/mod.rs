@@ -4,6 +4,7 @@ mod writer;
 
 use super::{FluentGroup, FluentMessage, FluentInformations, helpers::message_hash};
 use std::{io::{Write, Result}, collections::HashMap, path::Path, borrow::Borrow, hash::Hash};
+use crate::files::fluent::file::entry::EntryType;
 
 #[derive(Debug)]
 pub struct FluentFile {
@@ -78,8 +79,8 @@ impl FluentFile {
         let id = match self.find_message_id(ctxt, &hash) {
             Some(v) => v,
             None => match ctxt {
-                Some(ctxt) => format!("{}-msg-{}", ctxt, self.messages.len() + 1),
-                None => format!("msg-{}", self.messages.len() + 1),
+                Some(ctxt) => format!("{}-msg-{:04}", ctxt, self.messages.len() + 1),
+                None => format!("msg-{:04}", self.messages.len() + 1),
             }
         };
 
@@ -91,6 +92,8 @@ impl FluentFile {
             if let Some(ctxt) = ctxt {
                 infos.set_header("context", ctxt.to_string());
             }
+
+            self.entries.push(EntryType::Message(res.id().clone()));
 
             res
         })

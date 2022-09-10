@@ -14,7 +14,7 @@ impl InputPoFile {
         let parent = match path.parent() {
             Some(v) => v,
             None => {
-                let msg = format!("The domain cannot be extracted from the path {:?} (unknown parent)", path);
+                let msg = format!("The domain cannot be extracted from the path `{}` (unknown parent)", path.display());
 
                 return Err(mk_error(ErrorKind::NotFound, msg));
             }
@@ -23,7 +23,7 @@ impl InputPoFile {
         let language = match parent.file_name() {
             Some(v) => v.to_string_lossy().to_string(),
             None => {
-                let msg = format!("The domain cannot be extracted from the path {:?} (no name for the parent)", path);
+                let msg = format!("The domain cannot be extracted from the path `{}` (no name for the parent)", path.display());
 
                 return Err(mk_error(ErrorKind::NotFound, msg));
             }
@@ -32,7 +32,7 @@ impl InputPoFile {
         let domain = match path.file_stem() {
             Some(v) => v.to_string_lossy().to_string(),
             None => {
-                let msg = format!("The language cannot be extracted from the path {:?}", path);
+                let msg = format!("The language cannot be extracted from the path `{}`", path.display());
 
                 return Err(mk_error(ErrorKind::NotFound, msg));
             }

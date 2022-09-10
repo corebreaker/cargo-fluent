@@ -1,11 +1,12 @@
 use super::po_file::InputPoFile;
 use crate::{
     error::{mk_error, mk_error_with_msg_from_error, mk_error_with_msg_from_glob_error},
+    path_utils::path_to_string,
     cli::ConvertArgs as Args,
     config::Config,
 };
 
-use wax::{Glob, Pattern};
+use wax::Glob;
 use std::{io::{Result, ErrorKind}, env::current_dir};
 
 #[inline]
@@ -43,9 +44,9 @@ fn find_po_files(args: &Args, config: &Config) -> Result<Vec<InputPoFile>> {
     };
 
     let target_path = cwd.join("target");
-    let glob = Glob::new(&expression).map_err(mk_error_with_msg_from_glob_error)?;
+    let glob = Glob::new(&expression).map_err(|err| mk_error_with_msg_from_glob_error(err.into_owned()))?;
 
-    for entry in glob.walk(po_dir, usize::MAX) {
+    for entry in glob.walk(po_dir) {
         let entry = entry.map_err(mk_error_with_msg_from_error)?;
         let path = entry.path();
 
@@ -53,7 +54,7 @@ fn find_po_files(args: &Args, config: &Config) -> Result<Vec<InputPoFile>> {
             continue;
         }
 
-        print!(" - {}", path.to_string_lossy());
+        print!(" - {}", path_to_string(path));
         let file = match InputPoFile::read(entry.path()) {
             Ok(v) => v,
             Err(err) => {

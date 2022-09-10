@@ -3,7 +3,7 @@ mod infos;
 mod read_toml;
 mod path_helper;
 
-use crate::error::{mk_error, mk_error_with_msg};
+use crate::{error::{mk_error, mk_error_with_msg}, path_utils::path_to_string};
 use std::{io::{Result, ErrorKind}, path::{Path, PathBuf}, env::current_dir};
 
 #[derive(Debug)]
@@ -30,13 +30,13 @@ impl Config {
 
         if let Some(po_dir) = &po_dir {
             if !po_dir.exists() {
-                let msg = format!("The path `{}` does not exist", po_dir.to_string_lossy());
+                let msg = format!("The path `{}` does not exist", path_to_string(po_dir));
 
                 return Err(mk_error(ErrorKind::NotFound, msg));
             }
 
             if !po_dir.is_dir() {
-                return Err(mk_error_with_msg(format!("The path `{}` is not a directory", po_dir.to_string_lossy())));
+                return Err(mk_error_with_msg(format!("The path `{}` is not a directory", path_to_string(po_dir))));
             }
         }
 

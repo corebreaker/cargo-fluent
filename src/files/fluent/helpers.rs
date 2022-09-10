@@ -12,7 +12,7 @@ pub(super) fn add_header(headers: &mut HashMap<String, String>, key: &str, value
 
 #[inline]
 pub(super) fn make_error_from_error_list<E: std::error::Error>(prefix: &str, path: &Path, errs: Vec<E>) -> Error {
-    let mut msg = format!("{} {:?}:", prefix, path);
+    let mut msg = format!("{} `{}`:", prefix, path.display());
 
     for err in errs {
         msg.push_str(&format!("  - {}", err));

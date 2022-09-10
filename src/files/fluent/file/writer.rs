@@ -24,6 +24,10 @@ impl<'f, W: Write> FileWriter<'f, W> {
     }
 
     fn flush_group(&mut self) -> Result<()> {
+        if self.group_idx >= self.file.groups.len() {
+            return Ok(())
+        }
+
         for msg_id in self.file.groups[self.group_idx].message_ids() {
             if !self.group_visited_messages.contains(msg_id) {
                 self.write_message(&self.file.messages[msg_id])?;
@@ -44,9 +48,9 @@ impl<'f, W: Write> FileWriter<'f, W> {
             self.flush_group()?;
         }
 
-        for (msg_id, message) in &self.file.messages {
+        for msg_id in self.file.messages.keys().sorted() {
             if !self.visited_messages.contains(msg_id) {
-                self.write_message(message)?;
+                self.write_message(&self.file.messages[msg_id])?;
             }
         }
 
@@ -86,15 +90,16 @@ impl<'f, W: Write> FileWriter<'f, W> {
             }
         }
 
-        self.flush_file()
+        Ok(())
     }
 
     fn write(&mut self) -> Result<()> {
         for entry in &self.file.entries {
             self.write_entry(entry)?;
+            writeln!(self.w, "------------------------------------------------")?;
         }
 
-        Ok(())
+        self.flush_file()
     }
 }
 

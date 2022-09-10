@@ -15,23 +15,24 @@ categories = ["localization", "internationalization", "text-processing"]
 maintenance = { status = "passively-maintained" }
 
 [dependencies]
-toml = "~0.5.8"
-libc = "~0.2.121"
+toml = "~0.5.9"
+libc = "~0.2.132"
 poreader = "~1.1.1"
 fluent = "~0.16.0"
 fluent-syntax = "~0.11.0"
-sha3 = "~0.10.1"
-titlecase = "~1.1.0"
+sha3 = "~0.10.2"
+titlecase = "~2.1.0"
 simple-error = "~0.2.3"
-regex = "~1.5.5"
+regex = "~1.6.0"
 itertools = "~0.10.3"
-quote = "~1.0.17"
+quote = "~1.0.21"
 pathdiff = "~0.2.1"
-path-absolutize = "~3.0.12"
+path-absolutize = "~3.0.13"
 i18n-config = "~0.4.2"
-wax = { version = "~0.4.0", features = ["diagnostics-report"] }
-proc-macro2 = { version = "~1.0.36", features = ["span-locations"] }
-serde = { version = "~1.0.136", features = ["std", "serde_derive"] }
-syn = { version = "~1.0.89", features = ["full", "visit", "parsing", "extra-traits"] }
-clap = { version = "~3.1.6", features = ["wrap_help", "derive"] }
-iced = { version = "~0.3.0", features = ["default", "image", "svg", "tokio"] }
+wax = { version = "~0.5.0", features = ["diagnostics"] }
+miette = { version = "^4.7.0", features = ["fancy"] }
+proc-macro2 = { version = "~1.0.43", features = ["span-locations"] }
+serde = { version = "~1.0.144", features = ["std", "serde_derive"] }
+syn = { version = "~1.0.99", features = ["full", "visit", "parsing", "extra-traits"] }
+clap = { version = "~3.2.18", features = ["wrap_help", "derive"] }
+iced = { version = "~0.4.2", features = ["default", "image", "svg", "tokio"] }

@@ -1,5 +1,5 @@
 use super::{po_list::collect_po_files, registry::FluentFileRegistry};
-use crate::{config::Config, cli::ConvertArgs as Args};
+use crate::{path_utils::path_to_string, config::Config, cli::ConvertArgs as Args};
 use itertools::Itertools;
 use std::io::Result;
 
@@ -7,8 +7,8 @@ pub fn command(args: Args, config: Config) -> Result<()> {
     let output_dir = config.output();
 
     match config.po_dir() {
-        None => { println!("Convert from PO files to {:?}", output_dir); }
-        Some(input) => { println!("Convert from files {:?} to {:?}", input, output_dir); }
+        None => { println!("Convert from PO files to `{}`", output_dir.display()); }
+        Some(input) => { println!("Convert from files `{}` to `{}`", input.display(), output_dir.display()); }
     }
 
     println!("Collect files:");
@@ -25,7 +25,7 @@ pub fn command(args: Args, config: Config) -> Result<()> {
     println!();
     println!("Convert files:");
     for file in po_files {
-        print!(" - {}", file.path.to_string_lossy());
+        print!(" - {}", path_to_string(&file.path));
 
         let language = file.language.clone();
         let domain = domain.clone().unwrap_or_else(|| file.domain.clone());
