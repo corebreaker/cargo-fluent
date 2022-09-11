@@ -76,8 +76,6 @@ fn parse_path_pattern_from_base(pattern: &str, base_path: Option<PathBuf>) -> Re
         }
     }
 
-    let x = res.iter().map(|v| v.display().to_string()).collect::<Vec<_>>();
-
     Ok(res)
 }
 

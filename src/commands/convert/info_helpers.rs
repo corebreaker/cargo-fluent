@@ -1,6 +1,5 @@
 use crate::files::{pofile::{PoNote, PoComment}, fluent::FluentInformations};
 
-#[inline]
 pub(super) fn add_comments_and_notes(comments: &Vec<PoComment>, notes: &Vec<PoNote>, into: &mut FluentInformations) {
     {
         let mut infos = FluentInformations::new();
@@ -29,4 +28,20 @@ pub(super) fn add_comments_and_notes(comments: &Vec<PoComment>, notes: &Vec<PoNo
             into.add_comments(infos);
         }
     }
+}
+
+pub(super) fn replace_placeholders(s: &String) -> String {
+    let mut i = 1usize;
+    let mut res = s.to_string();
+
+    while let Some(pos) = res.find("{}") {
+        res.replace_range(pos..(pos+2), &format!("{{ $arg{} }}", i));
+        i += 1;
+    }
+
+    if i == 2 {
+        res = res.replace("{ $arg1 }", "{ $arg }");
+    }
+
+    res
 }

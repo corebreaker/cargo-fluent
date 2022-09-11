@@ -1,4 +1,4 @@
-use super::info_helpers::add_comments_and_notes;
+use super::info_helpers::{add_comments_and_notes, replace_placeholders};
 use crate::{files::{pofile::PoFile, fluent::FluentFile}, error::mk_error};
 use std::{path::{Path, PathBuf}, io::{Result, ErrorKind}, fmt::Write};
 
@@ -68,18 +68,19 @@ impl InputPoFile {
             match unit.values().len() {
                 0 => {}
                 1 => {
-                    msg.set_value(unit.values().iter().next().cloned());
+                    msg.set_value(unit.values().iter().next().map(replace_placeholders));
                 }
                 sz => {
                     let mut text = String::from("{ $count ->");
 
-                    for (i, v) in unit.values().iter().enumerate() {
+                    for (i, s) in unit.values().iter().enumerate() {
+                        let val = replace_placeholders(s);
                         let num = i + 1;
 
                         if num < sz {
-                            write!(text, "\n     [{}] {}", num, v).unwrap();
+                            write!(text, "\n     [{}] {}", num, val).unwrap();
                         } else {
-                            write!(text, "\n    *[other] {}", v).unwrap();
+                            write!(text, "\n    *[other] {}", val).unwrap();
                         }
                     }
 

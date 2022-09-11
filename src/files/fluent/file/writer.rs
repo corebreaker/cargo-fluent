@@ -1,4 +1,4 @@
-use super::{FluentFile, FluentMessage, entry::EntryType};
+use super::{FluentFile, FluentMessage, FluentInformations, entry::EntryType};
 use itertools::Itertools;
 use std::{io::{Write, Result}, collections::HashSet};
 
@@ -58,13 +58,16 @@ impl<'f, W: Write> FileWriter<'f, W> {
     }
 
     fn write_message(&mut self, message: &FluentMessage) -> Result<()> {
+        write!(self.w, "\n")?;
+        message.informations().write(&mut self.w, None, "#")?;
+
         let value = message.value().map_or_else(String::new, |v| format!(" = {}", v));
         let attributes = message.attributes().iter()
             .map(|(k, v)| format!("\n  .{} = {}", k, v))
             .join("");
 
         self.group_visited_messages.insert(message.id().clone());
-        writeln!(self.w, "\n{}{}{}", message.id(), value, attributes)
+        writeln!(self.w, "{}{}{}", message.id(), value, attributes)
     }
 
     fn write_entry(&mut self, entry: &EntryType) -> Result<()> {
@@ -96,7 +99,7 @@ impl<'f, W: Write> FileWriter<'f, W> {
     fn write(&mut self) -> Result<()> {
         for entry in &self.file.entries {
             self.write_entry(entry)?;
-            writeln!(self.w, "------------------------------------------------")?;
+            writeln!(self.w, "# -----------------------------------------------------------------------------")?;
         }
 
         self.flush_file()

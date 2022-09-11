@@ -1,6 +1,25 @@
 use std::{ops::Range, path::Path, io::{Result, BufReader}, fs::File, fmt::{Display, Formatter, Result as FmtResult}};
 use std::io::BufRead;
 
+struct PositionDesc {
+    line: usize,
+    range: Range<usize>,
+    text: String,
+}
+
+impl PositionDesc {
+    fn new(line: usize, start: usize, size: usize, text: String) -> Self {
+        Self {
+            text,
+            line,
+            range: Range {
+                start,
+                end: start + size
+            }
+        }
+    }
+}
+
 pub(crate) struct FilePosition {
     line: usize,
     column: usize,
@@ -28,7 +47,7 @@ impl Display for FilePosition {
 
 pub(crate) struct FilePositions {
     last: usize,
-    lines: Vec<(Range<usize>, String)>,
+    lines: Vec<PositionDesc>,
 }
 
 impl FilePositions {
@@ -38,20 +57,20 @@ impl FilePositions {
         let mut lines = vec![];
         let mut line = 1;
         let mut last = 0;
-        let mut size = 0;
+        let mut n = 0;
 
         loop {
-            let mut buf = String::new();
+            let mut text = String::new();
 
-            match input.read_line(&mut buf)? {
+            match input.read_line(&mut text)? {
                 0 => { break; },
-                n => {
-                    let start = last + size;
+                size => {
+                    let start = last + n;
 
-                    lines.push((Range { start, end: start + n }, buf));
+                    lines.push(PositionDesc::new(line, start, size, text));
 
                     last = start;
-                    size = n;
+                    n = size;
                 }
             }
 
@@ -64,9 +83,9 @@ impl FilePositions {
     pub(crate) fn get_position_from_offset(&self, offset: usize) -> FilePosition {
         let mut line = 1usize;
 
-        for (range, text) in &self.lines {
-            if range.contains(&offset) {
-                let subtext = &text[0..(offset - range.start + 1)];
+        for desc in &self.lines {
+            if desc.range.contains(&offset) {
+                let subtext = &desc.text[0..(offset - desc.range.start + 1)];
 
                 return FilePosition::new(line, subtext.chars().count() + 1);
             }

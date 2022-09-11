@@ -1,6 +1,6 @@
 use super::{FluentMessage, FluentInformations, pattern_stringifier::pattern_as_str};
-use regex::Regex;
 use fluent_syntax::ast::{Attribute, Comment, Identifier, Message, Pattern, Term};
+use regex::Regex;
 
 pub(super) trait IDecoder {
     fn get_id(&self) -> &Identifier<&str>;

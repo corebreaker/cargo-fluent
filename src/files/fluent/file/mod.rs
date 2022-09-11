@@ -110,8 +110,12 @@ impl FluentFile {
     }
 
     fn write_header<W: Write>(&self, w: &mut W) -> Result<()> {
-        let header = format!("Language: {}", self.lang);
+        let mut header: Option<String> = None;
 
-        self.infos.write(w, Some(&header), "###")
+        if self.infos.headers().contains_key("language") {
+            header.replace(format!("Language: {}", self.lang));
+        }
+
+        self.infos.write(w, header.as_ref(), "###")
     }
 }
