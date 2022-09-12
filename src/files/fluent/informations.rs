@@ -95,7 +95,7 @@ impl FluentInformations {
                 continue;
             }
 
-            let prefix = format!("{} @{}:", titlecase(prefix), name);
+            let prefix = format!("{} @{}:", prefix, titlecase(name));
             let prefix_size = prefix.chars().count();
             let mut line = prefix.clone();
             let mut size = prefix_size;
