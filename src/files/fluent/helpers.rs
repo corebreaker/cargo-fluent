@@ -3,10 +3,19 @@ use sha3::{Digest, Sha3_256};
 use fluent_syntax::parser::ParserError;
 use std::{path::Path, io::Error, collections::{HashMap, hash_map::Entry}, fmt::Write};
 
+pub(super) const MSG_SEP: &str = "-----------------------------------------------------------------------------";
+
+pub(super) fn filter_comment(s: &&str) -> Option<String> {
+    if *s == MSG_SEP { None } else { Some(s.to_string()) }
+}
+
 pub(super) fn add_header(headers: &mut HashMap<String, String>, key: &str, value: &str) {
     match headers.entry(key.to_lowercase()) {
         Entry::Vacant(entry) => { entry.insert(value.to_string()); }
-        Entry::Occupied(mut entry) => { entry.get_mut().push_str(value); }
+        Entry::Occupied(mut entry) => {
+            entry.get_mut().push_str(" ");
+            entry.get_mut().push_str(value);
+        }
     }
 }
 

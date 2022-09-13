@@ -1,4 +1,10 @@
-use super::{FluentMessage, FluentInformations, pattern_stringifier::pattern_as_str};
+use super::{
+    helpers::{filter_comment, MSG_SEP},
+    pattern_stringifier::pattern_as_str,
+    FluentInformations,
+    FluentMessage
+};
+
 use fluent_syntax::ast::{Attribute, Comment, Identifier, Message, Pattern, Term};
 use regex::Regex;
 
@@ -16,7 +22,7 @@ pub(super) trait IDecoder {
 
         let lines = self.get_comments()
             .as_ref()
-            .map(|v| v.content.iter().copied().map(String::from).collect::<Vec<_>>())
+            .map(|v| v.content.iter().filter_map(filter_comment).collect::<Vec<_>>())
             .unwrap_or_default();
 
         let value = self.get_value().map(pattern_as_str);

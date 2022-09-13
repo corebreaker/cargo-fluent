@@ -1,4 +1,4 @@
-use super::{FluentFile, FluentMessage, FluentInformations, entry::EntryType};
+use super::{FluentFile, FluentMessage, FluentInformations, entry::EntryType, super::helpers::MSG_SEP};
 use itertools::Itertools;
 use std::{io::{Write, Result}, collections::HashSet};
 
@@ -118,7 +118,7 @@ impl<'f, W: Write> FileWriter<'f, W> {
     fn write(&mut self) -> Result<()> {
         for entry in &self.file.entries {
             self.write_entry(entry)?;
-            writeln!(self.w, "# -----------------------------------------------------------------------------")?;
+            writeln!(self.w, "# {}", MSG_SEP)?;
         }
 
         self.flush_file()

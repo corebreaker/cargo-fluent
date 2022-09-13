@@ -18,7 +18,6 @@ maintenance = { status = "passively-maintained" }
 toml = "~0.5.9"
 libc = "~0.2.132"
 poreader = "~1.1.1"
-fluent = "~0.16.0"
 fluent-syntax = "~0.11.0"
 sha3 = "~0.10.2"
 titlecase = "~2.1.0"

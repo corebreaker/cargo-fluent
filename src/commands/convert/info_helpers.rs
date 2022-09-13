@@ -31,15 +31,15 @@ pub(super) fn add_comments_and_notes(comments: &Vec<PoComment>, notes: &Vec<PoNo
 }
 
 pub(super) fn replace_placeholders(s: &String) -> String {
-    let mut i = 1usize;
+    let mut i = 0usize;
     let mut res = s.to_string();
 
     while let Some(pos) = res.find("{}") {
-        res.replace_range(pos..(pos+2), &format!("{{ $arg{} }}", i));
         i += 1;
+        res.replace_range(pos..(pos+2), &format!("{{ $arg{} }}", i));
     }
 
-    if i == 2 {
+    if i == 1 {
         res = res.replace("{ $arg1 }", "{ $arg }");
     }
 

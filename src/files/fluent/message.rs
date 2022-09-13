@@ -29,7 +29,26 @@ impl FluentMessage {
             .map(String::from)
             .collect();
 
-        Self { id, value, attributes, locations, infos }
+        let mut res = Self { id, value, attributes, locations, infos };
+
+        res.update_location_header();
+        res
+    }
+
+    fn update_location_header(&mut self) {
+        let locations = self.locations.iter()
+            .map(|loc| {
+                let mut parts = loc.split(":");
+                let file = parts.next().unwrap_or_default();
+                let line: usize = parts.next().unwrap_or("0").parse().unwrap_or(0usize);
+
+                (file, line, loc)
+            })
+            .sorted()
+            .map(|(_, _, loc)| loc)
+            .join(" ");
+
+        self.infos.set_header("locations", locations);
     }
 
     pub(super) fn equals(&self, ctxt: Option<&str>, hash: &str) -> bool {
@@ -77,7 +96,7 @@ impl FluentMessage {
 
     pub(crate) fn add_location(&mut self, location: String) {
         if self.locations.insert(location) {
-            self.infos.set_header("locations", self.locations.iter().sorted().join(" "));
+            self.update_location_header();
         }
     }
 
