@@ -1,4 +1,4 @@
-use super::{FluentFile, FluentMessage, entry::EntryType};
+use super::{FluentFile, FluentMessage, FluentInformations, entry::EntryType, super::helpers::MSG_SEP};
 use itertools::Itertools;
 use std::{io::{Write, Result}, collections::HashSet};
 
@@ -24,6 +24,10 @@ impl<'f, W: Write> FileWriter<'f, W> {
     }
 
     fn flush_group(&mut self) -> Result<()> {
+        if self.group_idx >= self.file.groups.len() {
+            return Ok(())
+        }
+
         for msg_id in self.file.groups[self.group_idx].message_ids() {
             if !self.group_visited_messages.contains(msg_id) {
                 self.write_message(&self.file.messages[msg_id])?;
@@ -44,9 +48,9 @@ impl<'f, W: Write> FileWriter<'f, W> {
             self.flush_group()?;
         }
 
-        for (msg_id, message) in &self.file.messages {
+        for msg_id in self.file.messages.keys().sorted() {
             if !self.visited_messages.contains(msg_id) {
-                self.write_message(message)?;
+                self.write_message(&self.file.messages[msg_id])?;
             }
         }
 
@@ -54,13 +58,20 @@ impl<'f, W: Write> FileWriter<'f, W> {
     }
 
     fn write_message(&mut self, message: &FluentMessage) -> Result<()> {
+        message.informations().write(&mut self.w, None, "#")?;
+
         let value = message.value().map_or_else(String::new, |v| format!(" = {}", v));
-        let attributes = message.attributes().iter()
-            .map(|(k, v)| format!("\n  .{} = {}", k, v))
-            .join("");
 
         self.group_visited_messages.insert(message.id().clone());
-        writeln!(self.w, "\n{}{}{}", message.id(), value, attributes)
+        self.w.write_all(message.id().as_bytes())?;
+        self.w.write_all(value.as_bytes())?;
+
+        for (k, v) in message.attributes() {
+            writeln!(self.w)?;
+            write!(self.w, "  .{} = {}", k, v)?;
+        }
+
+        writeln!(self.w)
     }
 
     fn write_entry(&mut self, entry: &EntryType) -> Result<()> {
@@ -69,38 +80,48 @@ impl<'f, W: Write> FileWriter<'f, W> {
                 let idx = self.junk_idx;
 
                 self.junk_idx += 1;
-                writeln!(self.w, "\n{}", self.file.junk[idx])?;
+                writeln!(self.w)?;
+                self.w.write_all(self.file.junk[idx].as_bytes())?;
+                writeln!(self.w)?;
             }
             EntryType::Group => {
                 self.flush_group()?;
                 self.file.groups[self.group_idx].write(&mut self.w)?;
             }
             EntryType::ResourceHeader => { self.file.write_header(&mut self.w)?; }
-            EntryType::Message(message) => { self.write_message(&self.file.messages[message])?; }
+            EntryType::Message(message) => {
+                let message = &self.file.messages[message];
+
+                writeln!(self.w)?;
+                self.write_message(message)?;
+
+                let id = message.id();
+
+                self.visited_messages.insert(id.clone());
+                if self.group_idx < self.file.groups.len() {
+                    self.group_visited_messages.insert(id.clone());
+                }
+            }
             EntryType::Comment(lines) => {
                 for line in lines {
-                    write!(self.w, "\n# {}", line)?;
+                    writeln!(self.w)?;
+                    write!(self.w, "# {}", line)?;
                 }
 
-                writeln!(self.w, "")?;
+                writeln!(self.w)?;
             }
         }
 
-        self.flush_file()
+        Ok(())
     }
 
     fn write(&mut self) -> Result<()> {
-        let mut iter = self.file.entries.iter();
-
-        if let Some(entry) = iter.next() {
+        for entry in &self.file.entries {
             self.write_entry(entry)?;
+            writeln!(self.w, "# {}", MSG_SEP)?;
         }
 
-        for entry in iter {
-            self.write_entry(entry)?;
-        }
-
-        Ok(())
+        self.flush_file()
     }
 }
 

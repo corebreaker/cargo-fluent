@@ -56,7 +56,8 @@ pub enum CliCommand {
         The domain will be the name of the Fluent file (FLT file).\n\
         Therefore, the name of each PO file found will be the domain.\n\
         \n\
-        The flag `merge` will merge all translations found in PO files into one Fluent file.\n\
+        The flag `merge` will merge all translations in PO files for all found domains into one Fluent file. \
+        A merge is done for each found language.\n\
         If it was not specified, \
         the list of paths overrides the argument `domain` and the domain found in config files.\
     ")]
@@ -88,9 +89,13 @@ pub struct ConvertArgs {
     #[clap(short, long)]
     pub(crate) domain: Option<String>,
 
-    /// Merge all PO files into one FLT file per language and for all found domains
+    /// Merge all PO files for all found domains into one FLT file, one merge per found language
     #[clap(short, long)]
     pub(crate) merge: bool,
+
+    /// Include fuzzy entries from PO files
+    #[clap(short = 'f', long)]
+    pub(crate) include_fuzzy: bool,
 
     /// PO files or directories used instead files found with config files
     #[clap(value_name = "PATH", parse(try_from_str = parse_path_pattern))]
@@ -102,7 +107,7 @@ impl ConvertArgs {
         if self.po_files.is_empty() {
             None
         } else {
-            Some(self.po_files.iter().flatten().map(|p| p.as_path()).collect())
+            Some(self.po_files.iter().flatten().map(PathBuf::as_path).collect())
         }
     }
 }
@@ -114,6 +119,6 @@ mod test {
     #[test]
     fn verify_app() {
         use clap::CommandFactory;
-        CliCommand::command().debug_assert()
+        CliArgs::command().debug_assert()
     }
 }

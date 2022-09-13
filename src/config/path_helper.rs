@@ -15,7 +15,7 @@ pub(super) fn make_dirpath(p: String) -> Result<PathBuf> {
     let res = PathBuf::from(p);
 
     if res.exists() && !res.is_dir() {
-        Err(mk_error_with_msg(format!("If the path {:?} exists, it must be a directory", res)))
+        Err(mk_error_with_msg(format!("If the path `{}` exists, it must be a directory", res.display())))
     } else {
         res.absolutize().map(make_path_from_cow_path)
     }

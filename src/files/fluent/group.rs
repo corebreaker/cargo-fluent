@@ -47,6 +47,8 @@ impl FluentGroup {
     }
 
     pub(super) fn write<W: Write>(&self, w: &mut W) -> Result<()> {
-        self.infos.write(w, self.name.as_ref(), "##")
+        let name = self.name.as_ref().map(|name| format!("Group-name: {}", name));
+
+        self.infos.write(w, name.as_ref(), "##")
     }
 }

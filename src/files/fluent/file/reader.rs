@@ -1,20 +1,24 @@
-use super::{super::{helpers::{make_error, IMessage}, FluentInformations, FluentGroup}, entry::EntryType, FluentFile};
+use super::{
+    super::{helpers::{make_error_from_error_list, filter_comment}, decoder::IDecoder, FluentInformations, FluentGroup},
+    entry::EntryType,
+    FluentFile,
+};
+
 use regex::Regex;
-use fluent::FluentResource;
-use fluent_syntax::ast::Entry;
-use unic_langid::LanguageIdentifier;
+use fluent_syntax::{ast::Entry, parser::parse as parse_fluent};
 use std::{io::{Result, Error, ErrorKind}, collections::HashMap, path::Path, fs::read_to_string};
 
-pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> {
-    let infos_re = match Regex::new(r"^\s*@(\w+)[^:]*:\s*(\S.*)\s*$") {
+pub(super) fn read(lang: String, path: &Path) -> Result<FluentFile> {
+    let infos_re = match Regex::new(r"^\s*@([\w-]+)[^:]*:\s*(\S.*)\s*$") {
         Ok(re) => re,
         Err(err) => { return Err(Error::new(ErrorKind::Other, err)); }
     };
 
-    let resource = match FluentResource::try_new(read_to_string(path)?) {
+    let source = read_to_string(path)?;
+    let resource = match parse_fluent(source.as_str()) {
         Ok(r) => r,
         Err((_, errs)) => {
-            return Err(make_error("Parse error while reading fluent file", path, errs));
+            return Err(make_error_from_error_list("Parse error while reading fluent file", path, errs));
         }
     };
 
@@ -28,7 +32,7 @@ pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> 
     let mut current_group_infos: Option<FluentInformations> = None;
     let mut current_group_message_ids = vec![];
 
-    for entry in resource.entries() {
+    for entry in resource.body {
         match entry {
             Entry::Message(msg) => {
                 let msg = msg.decode_normalized_message(&infos_re);
@@ -49,19 +53,27 @@ pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> 
                 messages.insert(id, msg);
             }
             Entry::Comment(c) => {
-                entries.push(EntryType::Comment(c.content.iter().map(|c| c.to_string()).collect::<Vec<_>>()));
+                let lines = c.content.iter().filter_map(filter_comment).collect::<Vec<_>>();
+
+                if !lines.is_empty() {
+                    entries.push(EntryType::Comment(lines));
+                }
             }
             Entry::GroupComment(c) => {
+                let lines = c.content.iter().filter_map(filter_comment).collect::<Vec<_>>();
+                if lines.is_empty() {
+                    continue;
+                }
+
                 if let Some(infos) = current_group_infos.take() {
                     groups.push(FluentGroup::new(current_group_name.take(), current_group_message_ids, infos));
                     current_group_message_ids = vec![];
                 }
 
-                let lines = c.content.iter().map(|c| c.to_string()).collect::<Vec<_>>();
-                let mut infos = FluentInformations::new(&infos_re, lines);
+                let mut infos = FluentInformations::from_lines(&infos_re, lines);
 
                 entries.push(EntryType::Group);
-                current_group_name = infos.remove_header("name");
+                current_group_name = infos.remove_header("group-name");
                 current_group_infos.replace(infos);
             }
             Entry::ResourceComment(c) => {
@@ -69,7 +81,7 @@ pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> 
                     entries.push(EntryType::ResourceHeader);
                 }
 
-                info_lines.extend(c.content.iter().map(|l| l.to_string()));
+                info_lines.extend(c.content.iter().filter_map(filter_comment));
             }
             Entry::Junk { content } => {
                 entries.push(EntryType::Junk);
@@ -86,7 +98,7 @@ pub(super) fn read(lang: LanguageIdentifier, path: &Path) -> Result<FluentFile> 
         lang,
         messages,
         groups,
-        infos: FluentInformations::new(&infos_re, info_lines),
+        infos: FluentInformations::from_lines(&infos_re, info_lines),
         junk,
         entries,
     })

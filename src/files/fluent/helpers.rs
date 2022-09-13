@@ -1,76 +1,47 @@
-use super::{FluentMessage, FluentInformations, pattern_stringifier::pattern_as_str};
-use crate::error::mk_error_with_msg;
-use regex::Regex;
-use fluent_syntax::ast::{Attribute, Comment, Identifier, Message, Pattern, Term};
-use std::{path::Path, io::Error};
+use crate::{error::{mk_error_with_msg, error_to_string}, files::positions::FilePositions};
+use sha3::{Digest, Sha3_256};
+use fluent_syntax::parser::ParserError;
+use std::{path::Path, io::Error, collections::{HashMap, hash_map::Entry}, fmt::Write};
 
-#[inline]
-pub(super) fn make_error<E: std::error::Error>(prefix: &str, path: &Path, errs: Vec<E>) -> Error {
-    let mut msg = format!("{} {:?}:", prefix, path);
+pub(super) const MSG_SEP: &str = "-----------------------------------------------------------------------------";
 
+pub(super) fn filter_comment(s: &&str) -> Option<String> {
+    if *s == MSG_SEP { None } else { Some(s.to_string()) }
+}
+
+pub(super) fn add_header(headers: &mut HashMap<String, String>, key: &str, value: &str) {
+    match headers.entry(key.to_lowercase()) {
+        Entry::Vacant(entry) => { entry.insert(value.to_string()); }
+        Entry::Occupied(mut entry) => {
+            entry.get_mut().push_str(" ");
+            entry.get_mut().push_str(value);
+        }
+    }
+}
+
+pub(super) fn make_error_from_error_list(prefix: &str, path: &Path, errs: Vec<ParserError>) -> Error {
+    let positions = match FilePositions::read(path) {
+        Err(e) => { return e; }
+        Ok(r) => r
+    };
+
+    let mut msg = String::new();
+
+    writeln!(msg, "{} `{}`:", prefix, path.display()).expect("Unexpected error while writing in string");
     for err in errs {
-        msg.push_str(&format!("  - {}", err));
+        let display = error_to_string(&err);
+        let beg = positions.get_position_from_offset(err.pos.start);
+        let end = positions.get_position_from_offset(err.pos.end);
+
+        writeln!(msg, "  - at {} .. {}, {}", beg, end, display).expect("Unexpected error while writing in string");
     }
 
     mk_error_with_msg(msg)
 }
 
-pub(super) trait IMessage {
-    fn get_id(&self) -> &Identifier<&str>;
-    fn get_value(&self) -> Option<&Pattern<&str>>;
-    fn get_attributes(&self) -> &Vec<Attribute<&str>>;
-    fn get_comments(&self) -> &Option<Comment<&str>>;
+pub(super) fn message_hash(text: &str) -> String {
+    let mut hasher = Sha3_256::new();
 
-    fn decode_normalized_message(&self, infos_re: &Regex) -> FluentMessage {
-        let id = self.get_id().name.to_string();
-        let attributes = self.get_attributes().iter()
-            .map(|attr| (attr.id.name.to_string(), pattern_as_str(&attr.value)))
-            .collect();
-
-        let lines = self.get_comments()
-            .as_ref()
-            .map(|v| v.content.iter().copied().map(String::from).collect::<Vec<_>>())
-            .unwrap_or_default();
-
-        let value = self.get_value().map(pattern_as_str);
-        let infos = FluentInformations::new(infos_re, lines);
-
-        FluentMessage::new(id.clone(), value, attributes, infos)
-    }
-}
-
-impl IMessage for Term<&str> {
-    fn get_id(&self) -> &Identifier<&str> {
-        &self.id
-    }
-
-    fn get_value(&self) -> Option<&Pattern<&str>> {
-        Some(&self.value)
-    }
-
-    fn get_attributes(&self) -> &Vec<Attribute<&str>> {
-        &self.attributes
-    }
-
-    fn get_comments(&self) -> &Option<Comment<&str>> {
-        &self.comment
-    }
-}
-
-impl IMessage for Message<&str> {
-    fn get_id(&self) -> &Identifier<&str> {
-        &self.id
-    }
-
-    fn get_value(&self) -> Option<&Pattern<&str>> {
-        self.value.as_ref()
-    }
-
-    fn get_attributes(&self) -> &Vec<Attribute<&str>> {
-        &self.attributes
-    }
-
-    fn get_comments(&self) -> &Option<Comment<&str>> {
-        &self.comment
-    }
+    hasher.update(text);
+    format!("{:x}", hasher.finalize())
 }
